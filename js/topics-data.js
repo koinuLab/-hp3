@@ -1,6 +1,27 @@
 /* Topics Content Data */
 const topicsData = [
     {
+        "date": "2026/11/02",
+        "dateType": "掲載日",
+        "content": "e-Taxソフトの不具合に伴う改修について",
+        "url": "https://www.e-tax.nta.go.jp/topics/2026/topics_20261102_e-taxsoft.htm",
+        "addedAt": "2026-11-04T17:53:53+09:00"
+    },
+    {
+        "date": "2026/10/30",
+        "dateType": "掲載日",
+        "content": "令和７事務年度　法人税等の申告（課税）事績の概要（令和８年10月）",
+        "url": "https://www.nta.go.jp/information/release/kokuzeicho/2026/hojin_shinkoku/index.htm",
+        "addedAt": "2026-11-04T17:53:53+09:00"
+    },
+    {
+        "date": "2026/10/20",
+        "dateType": "掲載日",
+        "content": "令和７年度におけるe-Taxの利用状況等について",
+        "url": "https://www.e-tax.nta.go.jp/topics/topics_riyozyokyo.htm",
+        "addedAt": "2026-11-04T17:53:53+09:00"
+    },
+    {
         "date": "2026/10/20",
         "dateType": "掲載日",
         "content": "令和9年1月からe-Taxが一層便利になります。",
@@ -110,7 +131,10 @@ const topicsData = [
         "dateType": "掲載日",
         "content": "各種申告書・記載例（扶養控除等申告書など）",
         "url": "https://www.nta.go.jp/users/gensen/nencho/shinkokusyo/index.htm"
-    },
+    }
+];
+
+const topicsArchiveData = topicsData.concat([
     {
         "date": "2026/08/27",
         "dateType": "発出日",
@@ -128,10 +152,7 @@ const topicsData = [
         "dateType": "掲載日",
         "content": "消費税率引下げ特設サイト",
         "url": "https://www.nta.go.jp/taxes/shiraberu/zeimokubetsu/shohi/keigenzeiritsu/zeiritsuhikisage.htm"
-    }
-];
-
-const topicsArchiveData = topicsData.concat([
+    },
     {
         "date": "2026/08/31",
         "dateType": "掲載日",
