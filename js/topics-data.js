@@ -1,6 +1,13 @@
 /* Topics Content Data */
 const topicsData = [
     {
+        "date": "2026/11/13",
+        "dateType": "掲載日",
+        "content": "令和８年版　法人税のあらましと申告の手引",
+        "url": "https://www.nta.go.jp/publication/pamph/hojin/aramashi2026/01.htm",
+        "addedAt": "2026-11-15T12:36:46+09:00"
+    },
+    {
         "date": "2026/11/02",
         "dateType": "掲載日",
         "content": "e-Taxソフトの不具合に伴う改修について",
@@ -125,16 +132,16 @@ const topicsData = [
         "dateType": "実施日",
         "content": "所得税徴収高計算書（納付書）の記載のしかた",
         "url": "https://www.nta.go.jp/publication/pamph/gensen/keisansho/01.htm"
-    },
+    }
+];
+
+const topicsArchiveData = topicsData.concat([
     {
         "date": "2026/08/31",
         "dateType": "掲載日",
         "content": "各種申告書・記載例（扶養控除等申告書など）",
         "url": "https://www.nta.go.jp/users/gensen/nencho/shinkokusyo/index.htm"
-    }
-];
-
-const topicsArchiveData = topicsData.concat([
+    },
     {
         "date": "2026/08/27",
         "dateType": "発出日",
