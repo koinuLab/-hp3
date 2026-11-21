@@ -1,6 +1,27 @@
 /* Topics Content Data */
 const topicsData = [
     {
+        "date": "2026/11/18",
+        "dateType": "掲載日",
+        "content": "生命保険・損害保険の一時金申告忘れていませんか？（令和8年11月）",
+        "url": "https://www.nta.go.jp/publication/pamph/01.htm#a0025012-022",
+        "addedAt": "2026-11-21T15:37:42+09:00"
+    },
+    {
+        "date": "2026/11/18",
+        "dateType": "掲載日",
+        "content": "新設法人が設立の日に通算グループから離脱する場合のその法人の事業年度及び青色申告の承認について（文書回答事例）",
+        "url": "https://www.nta.go.jp/about/organization/tokyo/bunshokaito/hojin/261027/index.htm",
+        "addedAt": "2026-11-21T15:37:42+09:00"
+    },
+    {
+        "date": "2026/11/16",
+        "dateType": "掲載日",
+        "content": "【法人の方へ】法人税の確定申告等の提出部数について",
+        "url": "https://www.e-tax.nta.go.jp/topics/2026/topics_20261116.htm",
+        "addedAt": "2026-11-21T15:37:42+09:00"
+    },
+    {
         "date": "2026/11/13",
         "dateType": "掲載日",
         "content": "令和８年版　法人税のあらましと申告の手引",
@@ -114,7 +135,10 @@ const topicsData = [
         "dateType": "掲載日",
         "content": "外部委託による記帳指導について、「会計ソフト方式（コンパクト型）」の概要等を掲載しました",
         "url": "https://www.nta.go.jp/taxes/shiraberu/shinkoku/kojin_jigyo/index.htm"
-    },
+    }
+];
+
+const topicsArchiveData = topicsData.concat([
     {
         "date": "2026/10/01",
         "dateType": "掲載日",
@@ -132,10 +156,7 @@ const topicsData = [
         "dateType": "実施日",
         "content": "所得税徴収高計算書（納付書）の記載のしかた",
         "url": "https://www.nta.go.jp/publication/pamph/gensen/keisansho/01.htm"
-    }
-];
-
-const topicsArchiveData = topicsData.concat([
+    },
     {
         "date": "2026/08/31",
         "dateType": "掲載日",
