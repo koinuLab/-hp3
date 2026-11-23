@@ -19,7 +19,7 @@
     return {
         base: 'https://www.nta.go.jp',
         yearLabel: '令和8年分',
-        checkedAt: '2026年10月8日',
+        checkedAt: '2026年11月23日',
         groups: [
             {
                 id: 'start', title: 'まず確認する（全体像・今年の改正）',
@@ -29,7 +29,8 @@
                     { t: '冊子「令和8年分 年末調整のしかた」', d: '章ごとの一覧。「昨年と比べて変わった点」、給与所得控除後の給与等の金額の表、算出所得税額の速算表もここから。', u: '/publication/pamph/gensen/nencho2026/01.htm' },
                     { t: '令和8年度税制改正（基礎控除の引上げ等）', d: '基礎控除104万円・給与所得控除の最低保障74万円・扶養親族等の所得要件62万円など。令和8年12月1日施行。', u: '/users/gensen/2026kiso/index.htm' },
                     { t: '令和7年度税制改正（基礎控除の見直し・特定親族特別控除の創設）', d: '特定親族特別控除、源泉控除対象親族などの考え方。', u: '/users/gensen/2025kiso/index.htm' },
-                    { t: '通勤手当の非課税限度額の改正', d: '改正がある年は年末調整での精算が必要になることがあります。', u: '/users/gensen/2025tsukin/index.htm' },
+                    { t: '通勤手当の非課税限度額の改正（令和8年4月）', d: '片道65km以上の限度額引上げ、駐車場料金の加算（上限月5,000円）。令和8年4月1日以後に支払われるべき通勤手当から適用。', u: '/users/gensen/2026tsukin/index.htm' },
+                    { t: '食事の現物支給に係る非課税限度額の引上げ（令和8年4月）', d: '月額3,500円から7,500円に引上げ。令和8年4月1日以後に支給する食事から適用。', u: '/users/gensen/2026shokuji/index.htm' },
                     { t: '令和8年分 年末調整Q&A', d: '実務でよくある質問と回答。', u: '/publication/pamph/gensen/nencho2026/qa.htm' },
                     { t: '源泉徴収義務者（給与の支払者）の方へ', d: '給与の支払者向けの案内・動画・チェックポイント。', u: '/users/gensen/nencho/index/gimusya.htm' },
                     { t: '給与所得者（従業員）の方へ', d: '従業員に案内するときに使えるページ。', u: '/users/gensen/nencho/index/kyuyosyotokusya.htm' }
@@ -121,8 +122,7 @@
                     { t: '令和8年分 給与所得の源泉徴収票等の法定調書の作成と提出の手引', d: '源泉徴収票・支払調書・合計表の書き方。', u: '/publication/pamph/hotei/tebiki2026/index.htm' },
                     { t: 'No.7411「給与所得の源泉徴収票」の提出範囲と提出枚数等', d: '税務署への提出が必要な範囲。', u: TA + 'hotei/7411.htm' },
                     { t: '給与所得の源泉徴収票（同合計表）', d: '様式と手続の案内。', u: '/taxes/tetsuzuki/shinsei/annai/hotei/23100051.htm' },
-                    { t: '源泉徴収票のみなし提出の特例', d: '給与支払報告書を市区町村に提出した場合、税務署への源泉徴収票の提出が不要になる特例。', u: '/users/gensen/hotei/index/minashi.htm' },
-                    { t: '給与支払報告書・源泉徴収票のeLTAXでの一括作成・提出', d: '電子的提出の一元化。', u: '/taxes/tetsuzuki/shinsei/annai/hotei/eltax.htm' },
+                    { t: '源泉徴収票のみなし提出の特例', d: '給与支払報告書を市区町村に提出（eLTAX等）した場合、税務署への源泉徴収票の提出が不要になる特例。', u: '/users/gensen/hotei/index/minashi.htm' },
                     { t: 'No.7401 法定調書の種類', d: '提出が必要な法定調書の一覧。', u: TA + 'hotei/7401.htm' }
                 ]
             },

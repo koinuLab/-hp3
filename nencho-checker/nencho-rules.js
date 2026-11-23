@@ -492,12 +492,14 @@
                         : '配偶者の合計所得金額が' + yen(limit) + 'を超えるため同一生計配偶者に該当せず適用なし'
                 });
             }
+            sp.ics = icsCategory({ relation: 'spouse', age: sp.age, income: sp.income, selfIncome: totalIncome, cohabiting: sp.cohabiting, disability: sp.disability }, rules);
             persons.push(sp);
         }
 
         // ---- 3. 扶養控除・特定親族特別控除・扶養親族の障害者控除 ----
         var fuyouTotal = 0, specRelTotal = 0;
         depResults.forEach(function (d) {
+            d.ics = icsCategory({ relation: d.relation, age: d.age, income: d.income, selfIncome: totalIncome, cohabiting: d.cohabiting, disability: d.disability }, rules);
             persons.push(d);
             if (d.amount > 0) {
                 fuyouTotal += d.amount;
@@ -668,6 +670,7 @@
                 totalIncome: totalIncome
             },
             persons: persons,
+            selfShogai: icsShogai({ relation: 'self', disability: self.disability || 'none' }, rules),
             items: items,
             totals: {
                 fuyou: fuyouTotal,
@@ -727,6 +730,135 @@
             return { kind: 'none', label: '等級を選択してください', basis: hb.label, pending: true };
         }
         return { kind: hb.kind, label: hb.kind === 'special' ? '特別障害者' : '一般の障害者', basis: hb.label };
+    }
+
+    // ------------------------------------------------------------------
+    // ICS（給与上手くんα／給与処理db）の「配扶養区分」
+    //   社員登録 → 扶養情報①タブの区分。所得見積額と生年月日から自動判定される。
+    //   根拠：日本ICS「バージョンアップ情報〔給与上手くんα〕」2025-11-19（令和7年分年末調整対応）、
+    //         2025-12-25、2026-11-16（令和8年分年末調整対応）、定額減税FAQ（2024-07-30）
+    //   - 配偶者：「一般」「老人」「対象外」。本人の合計所得1,000万円超は所得要件内でも「対象外」。
+    //   - 扶養親族：19歳以上23歳未満で所得要件内は「特定」。特定親族は「対象外」＋「特親（源）」/「特親」表示。
+    //   上記資料に明記のない区分名（一般・老人・同居老親等・16歳未満）は confirmed:false とし、画面で注記する。
+    // ------------------------------------------------------------------
+    function icsHaifuyo(p, rules) {
+        var limit = rules.dependentIncomeLimit;
+        var specRelMax = rules.specificRelative[rules.specificRelative.length - 1][0];
+        var age = p.age, income = p.income;
+        // kubun … ICSの配扶養区分 ／ mark … ICS画面に出る補助表示（特親など）
+        // extra … このアプリ独自の補足バッジ（ICSの表記ではない。例：配偶者特別控除の対象）
+        var out = { kubun: '対象外', mark: '', extra: '', reason: '', confirmed: true, hints: [] };
+        if (p.excluded) {
+            out.extra = '控除なし';
+            out.reason = '事業専従者・他の人の扶養親族等のため控除の対象外';
+            return out;
+        }
+        if (p.relation === 'spouse') {
+            var spMax = rules.spouseSpecial[rules.spouseSpecial.length - 1][0];
+            if (income > limit) {
+                if (income <= spMax && p.selfIncome <= 10000000) {
+                    var col = p.selfIncome <= 9000000 ? 1 : p.selfIncome <= 9500000 ? 2 : 3;
+                    var amt = lookup(rules.spouseSpecial, income, col);
+                    out.extra = '配偶者特別控除の対象（' + yen(amt) + '）';
+                    out.reason = '配偶者の合計所得金額が' + man(limit) + '超' + man(spMax) + '以下のため、配偶者控除ではなく配偶者特別控除の対象。配扶養区分は「対象外」です';
+                    out.hints.push('配偶者特別控除は、年調データ入力の「基礎／配偶者／特親／調整控除申告書入力」タブで配偶者の合計所得金額を入力して計算します。');
+                    if (p.selfIncome <= 9000000 && income <= 950000) {
+                        out.hints.push('配偶者の所得95万円以下・ご本人の所得900万円以下のため、源泉控除対象配偶者に該当します（毎月の源泉徴収でも扶養親族等の数に含まれます）。');
+                    }
+                } else if (income > spMax) {
+                    out.extra = '控除なし';
+                    out.reason = '配偶者の合計所得金額が' + man(spMax) + 'を超えるため、配偶者控除・配偶者特別控除とも対象外';
+                } else {
+                    out.extra = '控除なし';
+                    out.reason = 'ご本人の合計所得金額が1,000万円を超えるため、配偶者特別控除も対象外';
+                }
+            } else if (p.selfIncome > 10000000) {
+                out.extra = '控除なし（同一生計配偶者）';
+                out.reason = 'ご本人の合計所得金額が1,000万円を超える（配偶者控除の対象外）';
+                out.hints.push('同一生計配偶者には該当するため、障害者控除がある場合は障害者区分の入力を確認してください。');
+            } else if (age != null && age >= 70) {
+                out.kubun = '老人';
+                out.reason = '控除対象配偶者で70歳以上（老人控除対象配偶者）';
+            } else {
+                out.kubun = '一般';
+                out.reason = '控除対象配偶者（合計所得金額' + man(limit) + '以下）' + (age == null ? '。生年月日が未入力のため70歳未満として判定' : '');
+            }
+            return out;
+        }
+        // 扶養親族
+        if (income > limit) {
+            if (age != null && age >= 19 && age < 23 && income <= specRelMax) {
+                out.mark = income <= 1000000 ? '特親（源）' : '特親';
+                out.extra = '特定親族特別控除の対象（' + yen(lookup(rules.specificRelative, income)) + '）';
+                out.reason = '特定親族（19歳以上23歳未満・所得' + man(limit) + '超' + man(specRelMax) + '以下）。配扶養区分は「対象外」のまま、「' + out.mark + '」と表示されます';
+                out.hints.push(income <= 1000000
+                    ? '所得100万円以下のため源泉控除対象親族です（毎月の源泉徴収でも扶養親族等の数に含まれます）。'
+                    : '所得100万円超のため源泉控除対象親族ではありません（年末調整の特定親族特別控除のみ）。');
+                out.hints.push('特定親族特別控除には生年月日と所得見積額の入力が必須です。');
+            } else {
+                out.extra = '控除なし';
+                out.reason = '合計所得金額が' + man(limit) + 'を超えるため扶養親族に該当しない' +
+                    (age != null && age >= 19 && age < 23 ? '（' + man(specRelMax) + '超のため特定親族にも該当しない）' : '（19歳以上23歳未満ではないため特定親族にも該当しない）');
+            }
+            return out;
+        }
+        if (age == null) {
+            out.kubun = '（生年月日を入力してください）';
+            out.reason = '年齢で区分が決まります';
+            out.confirmed = false;
+            out.pending = true;
+            return out;
+        }
+        if (age < 16) {
+            out.kubun = '年少（16歳未満）';
+            out.reason = '16歳未満の扶養親族（扶養控除なし・住民税に関する事項）';
+            out.confirmed = false;
+        } else if (age >= 19 && age < 23) {
+            out.kubun = '特定';
+            out.reason = '特定扶養親族（19歳以上23歳未満・所得' + man(limit) + '以下）';
+        } else if (age >= 70) {
+            if (p.relation === 'parent' && p.cohabiting) {
+                out.kubun = '老人（同居老親等）';
+                out.reason = '70歳以上の父母・祖父母で同居（同居老親等）';
+            } else {
+                out.kubun = '老人';
+                out.reason = '70歳以上（老人扶養親族・同居老親等以外）';
+            }
+            out.confirmed = false;
+        } else {
+            out.kubun = '一般';
+            out.reason = '一般の控除対象扶養親族（16歳以上）';
+            out.confirmed = false;
+        }
+        return out;
+    }
+
+    /**
+     * ICS の「障害者区分」：「一般」「特別」「同居特別」
+     *   根拠：日本ICS バージョンアップ情報 2025-12-25「配偶者の障害者区分が『一般』『特別』『同居特別』」
+     *   障害者控除は同一生計配偶者・扶養親族（所得要件内）に限られるため、要件外は applies:false。
+     *   p.disability … 'none' | 'general' | 'special'
+     */
+    function icsShogai(p, rules) {
+        var kind = p.disability || 'none';
+        if (kind === 'none') return null;
+        var who = p.relation === 'spouse' ? '同一生計配偶者' : '扶養親族';
+        if (p.relation !== 'self' && (p.excluded || p.income > rules.dependentIncomeLimit)) {
+            return { kubun: '入力不要', applies: false,
+                reason: who + '（所得' + man(rules.dependentIncomeLimit) + '以下）に該当しないため、障害者控除の対象外' };
+        }
+        if (kind === 'general') return { kubun: '一般', applies: true, amount: rules.disability.general, reason: '一般の障害者（控除額' + man(rules.disability.general) + '）' };
+        if (p.relation !== 'self' && p.cohabiting) {
+            return { kubun: '同居特別', applies: true, amount: rules.disability.specialCohabiting, reason: '同居している特別障害者（控除額' + man(rules.disability.specialCohabiting) + '）' };
+        }
+        return { kubun: '特別', applies: true, amount: rules.disability.special,
+            reason: '特別障害者（控除額' + man(rules.disability.special) + '）' + (p.relation === 'self' ? '' : '。別居のため同居特別ではない') };
+    }
+
+    function icsCategory(p, rules) {
+        var out = icsHaifuyo(p, rules);
+        out.shogai = icsShogai(p, rules);
+        return out;
     }
 
     // ------------------------------------------------------------------
@@ -854,6 +986,7 @@
             selfIncome: selfIncome, selfSalary: selfSalary,
             disability: { kind: dis.kind, label: disLabelFull, basis: dis.basis, pending: !!dis.pending, cohabiting: cohabiting },
             excluded: excluded, categories: categories, deductions: deductions, notes: notes,
+            ics: icsCategory({ relation: p.relation, age: age, income: income, selfIncome: selfIncome, cohabiting: cohabiting, excluded: isExcluded, disability: dis.kind }, rules),
             total: deductions.reduce(function (t, d) { return t + (d.applied ? d.amount : 0); }, 0)
         };
     }
@@ -863,6 +996,8 @@
         DISABILITY_HANDBOOKS: DISABILITY_HANDBOOKS,
         classifyDisability: classifyDisability,
         judgePerson: judgePerson,
+        icsCategory: icsCategory,
+        icsShogai: icsShogai,
         years: Object.keys(RULES).map(Number).sort(function (a, b) { return b - a; }),
         toInt: toInt,
         normalizeDigits: normalizeDigits,
