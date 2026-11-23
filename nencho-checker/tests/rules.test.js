@@ -242,4 +242,17 @@ eq('ICS 配偶者 一般 → 補足なし', ics({ relation: 'spouse', age: 50, i
 eq('ICS 子20歳 所得96万 → 特定親族特別控除41万', ics({ relation: 'child', age: 20, income: 960000, selfIncome: 4000000 }).extra, '特定親族特別控除の対象（410,000円）');
 eq('ICS 子30歳 所得70万 → 控除なし', ics({ relation: 'child', age: 30, income: 700000, selfIncome: 4000000 }).extra, '控除なし');
 
+// ICS 障害者区分（一般／特別／同居特別）
+const sh = (p) => R.icsCategory(Object.assign({ selfIncome: 4000000 }, p), R.RULES[2026]).shogai;
+eq('ICS障 手帳なし → null', sh({ relation: 'child', age: 10, income: 0 }), null);
+eq('ICS障 子 一般', sh({ relation: 'child', age: 10, income: 0, disability: 'general', cohabiting: true }).kubun, '一般');
+eq('ICS障 子 特別・同居 → 同居特別', sh({ relation: 'child', age: 10, income: 0, disability: 'special', cohabiting: true }).kubun, '同居特別');
+eq('ICS障 母 特別・別居 → 特別', sh({ relation: 'parent', age: 75, income: 0, disability: 'special', cohabiting: false }).kubun, '特別');
+eq('ICS障 配偶者 本人1000万超でも適用', sh({ relation: 'spouse', age: 50, income: 0, selfIncome: 12000000, disability: 'general' }).kubun, '一般');
+eq('ICS障 配偶者 所得63万 → 入力不要', sh({ relation: 'spouse', age: 50, income: 630000, disability: 'special', cohabiting: true }).applies, false);
+eq('ICS障 特定親族 → 入力不要', sh({ relation: 'child', age: 20, income: 900000, disability: 'general' }).kubun, '入力不要');
+eq('ICS障 本人 特別（同居特別にならない）', R.icsShogai({ relation: 'self', disability: 'special', cohabiting: true }, R.RULES[2026]).kubun, '特別');
+eq('ICS障 calculate.selfShogai', R.calculate({ year: 2026, self: { salary: 3000000, disability: 'general', marital: 'single' }, dependents: [], insurance: {} }).selfShogai.kubun, '一般');
+eq('ICS障 judgePerson', jp({ relation: 'child', birth: { y: 2016, m: 5, d: 5 }, handbook: 'ryoiku', grade: 'A', cohabiting: true }).ics.shogai.kubun, '同居特別');
+
 console.log(`pass=${pass} fail=${fail}`); process.exit(fail ? 1 : 0);

@@ -492,14 +492,14 @@
                         : '配偶者の合計所得金額が' + yen(limit) + 'を超えるため同一生計配偶者に該当せず適用なし'
                 });
             }
-            sp.ics = icsCategory({ relation: 'spouse', age: sp.age, income: sp.income, selfIncome: totalIncome, cohabiting: sp.cohabiting }, rules);
+            sp.ics = icsCategory({ relation: 'spouse', age: sp.age, income: sp.income, selfIncome: totalIncome, cohabiting: sp.cohabiting, disability: sp.disability }, rules);
             persons.push(sp);
         }
 
         // ---- 3. 扶養控除・特定親族特別控除・扶養親族の障害者控除 ----
         var fuyouTotal = 0, specRelTotal = 0;
         depResults.forEach(function (d) {
-            d.ics = icsCategory({ relation: d.relation, age: d.age, income: d.income, selfIncome: totalIncome, cohabiting: d.cohabiting }, rules);
+            d.ics = icsCategory({ relation: d.relation, age: d.age, income: d.income, selfIncome: totalIncome, cohabiting: d.cohabiting, disability: d.disability }, rules);
             persons.push(d);
             if (d.amount > 0) {
                 fuyouTotal += d.amount;
@@ -670,6 +670,7 @@
                 totalIncome: totalIncome
             },
             persons: persons,
+            selfShogai: icsShogai({ relation: 'self', disability: self.disability || 'none' }, rules),
             items: items,
             totals: {
                 fuyou: fuyouTotal,
@@ -740,7 +741,7 @@
     //   - 扶養親族：19歳以上23歳未満で所得要件内は「特定」。特定親族は「対象外」＋「特親（源）」/「特親」表示。
     //   上記資料に明記のない区分名（一般・老人・同居老親等・16歳未満）は confirmed:false とし、画面で注記する。
     // ------------------------------------------------------------------
-    function icsCategory(p, rules) {
+    function icsHaifuyo(p, rules) {
         var limit = rules.dependentIncomeLimit;
         var specRelMax = rules.specificRelative[rules.specificRelative.length - 1][0];
         var age = p.age, income = p.income;
@@ -829,6 +830,34 @@
             out.reason = '一般の控除対象扶養親族（16歳以上）';
             out.confirmed = false;
         }
+        return out;
+    }
+
+    /**
+     * ICS の「障害者区分」：「一般」「特別」「同居特別」
+     *   根拠：日本ICS バージョンアップ情報 2025-12-25「配偶者の障害者区分が『一般』『特別』『同居特別』」
+     *   障害者控除は同一生計配偶者・扶養親族（所得要件内）に限られるため、要件外は applies:false。
+     *   p.disability … 'none' | 'general' | 'special'
+     */
+    function icsShogai(p, rules) {
+        var kind = p.disability || 'none';
+        if (kind === 'none') return null;
+        var who = p.relation === 'spouse' ? '同一生計配偶者' : '扶養親族';
+        if (p.relation !== 'self' && (p.excluded || p.income > rules.dependentIncomeLimit)) {
+            return { kubun: '入力不要', applies: false,
+                reason: who + '（所得' + man(rules.dependentIncomeLimit) + '以下）に該当しないため、障害者控除の対象外' };
+        }
+        if (kind === 'general') return { kubun: '一般', applies: true, amount: rules.disability.general, reason: '一般の障害者（控除額' + man(rules.disability.general) + '）' };
+        if (p.relation !== 'self' && p.cohabiting) {
+            return { kubun: '同居特別', applies: true, amount: rules.disability.specialCohabiting, reason: '同居している特別障害者（控除額' + man(rules.disability.specialCohabiting) + '）' };
+        }
+        return { kubun: '特別', applies: true, amount: rules.disability.special,
+            reason: '特別障害者（控除額' + man(rules.disability.special) + '）' + (p.relation === 'self' ? '' : '。別居のため同居特別ではない') };
+    }
+
+    function icsCategory(p, rules) {
+        var out = icsHaifuyo(p, rules);
+        out.shogai = icsShogai(p, rules);
         return out;
     }
 
@@ -957,7 +986,7 @@
             selfIncome: selfIncome, selfSalary: selfSalary,
             disability: { kind: dis.kind, label: disLabelFull, basis: dis.basis, pending: !!dis.pending, cohabiting: cohabiting },
             excluded: excluded, categories: categories, deductions: deductions, notes: notes,
-            ics: icsCategory({ relation: p.relation, age: age, income: income, selfIncome: selfIncome, cohabiting: cohabiting, excluded: isExcluded }, rules),
+            ics: icsCategory({ relation: p.relation, age: age, income: income, selfIncome: selfIncome, cohabiting: cohabiting, excluded: isExcluded, disability: dis.kind }, rules),
             total: deductions.reduce(function (t, d) { return t + (d.applied ? d.amount : 0); }, 0)
         };
     }
@@ -968,6 +997,7 @@
         classifyDisability: classifyDisability,
         judgePerson: judgePerson,
         icsCategory: icsCategory,
+        icsShogai: icsShogai,
         years: Object.keys(RULES).map(Number).sort(function (a, b) { return b - a; }),
         toInt: toInt,
         normalizeDigits: normalizeDigits,

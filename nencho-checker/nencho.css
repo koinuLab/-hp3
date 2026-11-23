@@ -846,10 +846,6 @@ button, input, select { font-family: inherit; }
 
 .nencho-ics.is-compact {
     padding: 8px 12px;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 4px 10px;
 }
 
 .nencho-ics .ics-head {
@@ -887,14 +883,30 @@ button, input, select { font-family: inherit; }
     background: #fff;
 }
 
+.ics-shogai {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    margin-top: 6px;
+}
+
+.ics-shogai .ics-reason { flex: 1 1 100%; margin-top: 0; }
+.ics-label.is-shogai { background: #b0762a; }
+.ics-shogai .ics-kubun { color: #8a5a00; }
+.ics-kubun.is-off { color: #999 !important; font-size: 0.95rem; }
+.nencho-ics-row .why .ics-shogai { margin: 4px 0 2px; }
+.nencho-ics-row .val .ics-shogai { margin-top: 0; }
+
 .ics-extra {
     display: inline-block;
     font-weight: 700;
     font-size: 0.78rem;
     color: #fff;
     background: var(--color-primary);
-    border-radius: var(--radius-pill);
+    border-radius: 10px;
     padding: 1px 10px;
+    line-height: 1.5;
 }
 
 .ics-extra.is-none {
@@ -1144,6 +1156,7 @@ button, input, select { font-family: inherit; }
     }
     .nencho-tab small { display: none; }
     .nencho-guide-list { grid-template-columns: 1fr; }
+    .nencho-ics-row { grid-template-columns: minmax(0, 1fr); }
 
     .nencho-panel {
         padding: 22px 18px;
