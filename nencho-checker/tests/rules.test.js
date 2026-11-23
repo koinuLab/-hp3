@@ -211,4 +211,23 @@ eq('2011-01-02生 → 年少扶養 0', dedAmt(r, '扶養控除'), 0);
 r = jp({ relation: 'child', birth: { y: 2005, m: 8, d: 8 }, salary: 1300000 }, { salary: 5000000 }, 2025);
 eq('R7 子20歳 130万 → 特定親族 63万', dedAmt(r, '特定親族特別控除'), 630000);
 
+
+// ===== ICS 配扶養区分（日本ICS バージョンアップ情報 2025-11-19 / 2025-12-25 / 2026-11-16、定額減税FAQ） =====
+const ics = (p) => R.icsCategory(p, R.RULES[2026]);
+eq('ICS 配偶者 所得51万 → 一般', ics({ relation: 'spouse', age: 50, income: 510000, selfIncome: 4000000 }).kubun, '一般');
+eq('ICS 配偶者 所得62万 72歳 → 老人', ics({ relation: 'spouse', age: 72, income: 620000, selfIncome: 4000000 }).kubun, '老人');
+eq('ICS 配偶者 所得62万超 → 対象外', ics({ relation: 'spouse', age: 50, income: 620001, selfIncome: 4000000 }).kubun, '対象外');
+eq('ICS 配偶者 本人1000万超 → 対象外', ics({ relation: 'spouse', age: 50, income: 0, selfIncome: 10000001 }).kubun, '対象外');
+eq('ICS 子20歳 所得62万 → 特定', ics({ relation: 'child', age: 20, income: 620000, selfIncome: 4000000 }).kubun, '特定');
+let ic = ics({ relation: 'child', age: 20, income: 1000000, selfIncome: 4000000 });
+eq('ICS 子20歳 所得100万 → 対象外', ic.kubun, '対象外'); eq('ICS 子20歳 所得100万 → 特親（源）', ic.mark, '特親（源）');
+ic = ics({ relation: 'child', age: 20, income: 1230000, selfIncome: 4000000 });
+eq('ICS 子20歳 所得123万 → 対象外', ic.kubun, '対象外'); eq('ICS 子20歳 所得123万 → 特親', ic.mark, '特親');
+ic = ics({ relation: 'child', age: 20, income: 1230001, selfIncome: 4000000 });
+eq('ICS 子20歳 所得123万超 → 対象外', ic.kubun, '対象外'); eq('ICS 子20歳 所得123万超 → 表示なし', ic.mark, '');
+eq('ICS 子23歳 所得90万 → 対象外(特親なし)', ics({ relation: 'child', age: 23, income: 900000, selfIncome: 4000000 }).mark, '');
+eq('ICS 事業専従者 → 対象外', ics({ relation: 'child', age: 20, income: 0, selfIncome: 4000000, excluded: true }).kubun, '対象外');
+eq('ICS judgePerson に ics が付く', jp({ relation: 'child', birth: { y: 2006, m: 8, d: 8 }, salary: 1700000 }).ics.mark, '特親（源）');
+eq('ICS calculate の persons に ics が付く', c1.persons.find(p => p.role === 'spouse').ics.kubun, '一般');
+
 console.log(`pass=${pass} fail=${fail}`); process.exit(fail ? 1 : 0);

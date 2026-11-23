@@ -362,6 +362,28 @@
             navButtons(null, isMarried() ? '次へ：配偶者について' : '次へ：扶養親族について');
     }
 
+    /** ICS（給与上手くんα）の配扶養区分の表示。compact=true は1行表示 */
+    function icsBox(ics, compact) {
+        if (!ics) return '';
+        var val = '<strong class="ics-kubun">' + esc(ics.kubun) + '</strong>' +
+            (ics.mark ? ' <span class="ics-mark">' + esc(ics.mark) + '</span>' : '') +
+            (ics.confirmed ? '' : (ics.pending ? '' : ' <span class="ics-unconfirmed">※表記は要確認</span>'));
+        if (compact) {
+            return '<div class="nencho-ics is-compact"><span class="ics-label">ICS 配扶養区分</span>' + val + '</div>';
+        }
+        var html = '<div class="nencho-ics"><div class="ics-head"><span class="ics-label">ICS 配扶養区分</span>' + val + '</div>' +
+            '<div class="ics-reason">' + esc(ics.reason) + '</div>';
+        if (ics.hints && ics.hints.length) {
+            html += '<ul class="ics-hints">' + ics.hints.map(function (h) { return '<li>' + esc(h) + '</li>'; }).join('') + '</ul>';
+        }
+        if (!ics.confirmed && !ics.pending) {
+            html += '<div class="ics-note">※ この区分の画面上の表記はICSの公開資料で確認できていません。税務上の区分は上記のとおりなので、ICSの選択肢から該当するものを選んでください。</div>';
+        }
+        return html + '</div>';
+    }
+
+    var ICS_FOOTNOTE = 'ICS（給与上手くんα／給与処理db）の社員登録「扶養情報①」タブの区分です。所得見積額と生年月日を入力すると自動判定されるので、その結果の確認用として使ってください。';
+
     function judgeBox(person) {
         if (!person) return '';
         var rl = rules();
@@ -388,7 +410,7 @@
             if (person.specificRelativeAmount) html += '：控除額 <strong>' + fmt(person.specificRelativeAmount) + '円</strong>';
             if (person.disabilityAmount) html += '　＋ 障害者控除 ' + fmt(person.disabilityAmount) + '円';
         }
-        return html + '</div>';
+        return html + '</div>' + icsBox(person.ics, true);
     }
 
     function renderSpouse(result) {
@@ -496,6 +518,18 @@
         // 控除一覧
         var applied = result.items.filter(function (i) { return i.applied; });
         var notApplied = result.items.filter(function (i) { return !i.applied; });
+        if (result.persons.length) {
+            html += '<h4 class="nencho-result-title">ICSに入力する配扶養区分</h4><div class="nencho-ics-list">';
+            result.persons.forEach(function (p) {
+                var ic = p.ics || {};
+                html += '<div class="nencho-ics-row"><div class="who">' + esc(p.label) + (p.age != null ? '<small>' + p.age + '歳</small>' : '') + '</div>' +
+                    '<div class="val"><strong class="ics-kubun">' + esc(ic.kubun || '') + '</strong>' + (ic.mark ? ' <span class="ics-mark">' + esc(ic.mark) + '</span>' : '') +
+                    (ic.confirmed || ic.pending ? '' : ' <span class="ics-unconfirmed">※表記は要確認</span>') + '</div>' +
+                    '<div class="why">' + esc(ic.reason || '') + '</div></div>';
+            });
+            html += '</div><p class="nencho-help" style="margin-top:6px">' + ICS_FOOTNOTE + '</p>';
+        }
+
         html += '<h4 class="nencho-result-title">適用される所得控除</h4><div class="nencho-items">';
         if (!applied.length) html += '<p class="nencho-empty">適用される控除がありません。</p>';
         applied.forEach(function (it) {
@@ -615,6 +649,9 @@
         if (res.excluded.length) {
             html += '<div class="nencho-note" style="margin-top:0"><strong>対象外の理由：</strong>' + esc(res.excluded.join('、')) + '</div>';
         }
+
+        html += '<h4 class="nencho-result-title">ICSに入力する区分</h4>' + icsBox(res.ics, false) +
+            '<p class="nencho-help" style="margin-top:6px">' + ICS_FOOTNOTE + '</p>';
 
         html += '<h4 class="nencho-result-title">該当する区分</h4><ul class="nencho-cats">';
         res.categories.forEach(function (c) {

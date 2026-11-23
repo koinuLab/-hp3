@@ -832,6 +832,92 @@ button, input, select { font-family: inherit; }
     border-color: #c0392b;
 }
 
+/* ---- ICS 配扶養区分 ---- */
+.nencho-ics {
+    margin-top: 8px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    background: #eef3fb;
+    border-left: 4px solid #4a78b8;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    min-width: 0;
+}
+
+.nencho-ics.is-compact {
+    padding: 8px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+}
+
+.nencho-ics .ics-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+}
+
+.ics-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+    background: #4a78b8;
+    border-radius: var(--radius-pill);
+    padding: 2px 10px;
+    white-space: nowrap;
+}
+
+.ics-kubun {
+    font-size: 1.15rem;
+    color: #2d5590;
+}
+
+.nencho-ics.is-compact .ics-kubun { font-size: 1rem; }
+
+.ics-mark {
+    display: inline-block;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #2d5590;
+    border: 1.5px solid #4a78b8;
+    border-radius: 6px;
+    padding: 0 8px;
+    background: #fff;
+}
+
+.ics-unconfirmed {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #b36b00;
+}
+
+.nencho-ics .ics-reason { color: var(--color-text-light); font-size: 0.83rem; margin-top: 4px; }
+.nencho-ics .ics-hints { list-style: disc; padding-left: 1.3em; margin-top: 4px; font-size: 0.82rem; color: var(--color-text-light); }
+.nencho-ics .ics-note { margin-top: 6px; font-size: 0.78rem; color: #8a5a00; }
+
+.nencho-ics-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nencho-ics-row {
+    display: grid;
+    grid-template-columns: minmax(0, 9em) minmax(0, 1fr);
+    gap: 2px 14px;
+    align-items: baseline;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: #eef3fb;
+    border-left: 4px solid #4a78b8;
+}
+
+.nencho-ics-row .who { font-weight: 700; overflow-wrap: anywhere; }
+.nencho-ics-row .who small { font-weight: 400; color: var(--color-text-light); margin-left: 6px; }
+.nencho-ics-row .why { grid-column: 1 / -1; font-size: 0.8rem; color: var(--color-text-light); line-height: 1.6; }
+
 /* ---- 年末調整のしかた（リンク集） ---- */
 .nencho-guide-toc {
     display: flex;
