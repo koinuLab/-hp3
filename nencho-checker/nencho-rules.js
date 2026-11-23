@@ -744,18 +744,35 @@
         var limit = rules.dependentIncomeLimit;
         var specRelMax = rules.specificRelative[rules.specificRelative.length - 1][0];
         var age = p.age, income = p.income;
-        var out = { kubun: '対象外', mark: '', reason: '', confirmed: true, hints: [] };
+        // kubun … ICSの配扶養区分 ／ mark … ICS画面に出る補助表示（特親など）
+        // extra … このアプリ独自の補足バッジ（ICSの表記ではない。例：配偶者特別控除の対象）
+        var out = { kubun: '対象外', mark: '', extra: '', reason: '', confirmed: true, hints: [] };
         if (p.excluded) {
+            out.extra = '控除なし';
             out.reason = '事業専従者・他の人の扶養親族等のため控除の対象外';
             return out;
         }
         if (p.relation === 'spouse') {
+            var spMax = rules.spouseSpecial[rules.spouseSpecial.length - 1][0];
             if (income > limit) {
-                out.reason = '配偶者の合計所得金額が' + man(limit) + 'を超える';
-                if (income <= rules.spouseSpecial[rules.spouseSpecial.length - 1][0] && p.selfIncome <= 10000000) {
+                if (income <= spMax && p.selfIncome <= 10000000) {
+                    var col = p.selfIncome <= 9000000 ? 1 : p.selfIncome <= 9500000 ? 2 : 3;
+                    var amt = lookup(rules.spouseSpecial, income, col);
+                    out.extra = '配偶者特別控除の対象（' + yen(amt) + '）';
+                    out.reason = '配偶者の合計所得金額が' + man(limit) + '超' + man(spMax) + '以下のため、配偶者控除ではなく配偶者特別控除の対象。配扶養区分は「対象外」です';
                     out.hints.push('配偶者特別控除は、年調データ入力の「基礎／配偶者／特親／調整控除申告書入力」タブで配偶者の合計所得金額を入力して計算します。');
+                    if (p.selfIncome <= 9000000 && income <= 950000) {
+                        out.hints.push('配偶者の所得95万円以下・ご本人の所得900万円以下のため、源泉控除対象配偶者に該当します（毎月の源泉徴収でも扶養親族等の数に含まれます）。');
+                    }
+                } else if (income > spMax) {
+                    out.extra = '控除なし';
+                    out.reason = '配偶者の合計所得金額が' + man(spMax) + 'を超えるため、配偶者控除・配偶者特別控除とも対象外';
+                } else {
+                    out.extra = '控除なし';
+                    out.reason = 'ご本人の合計所得金額が1,000万円を超えるため、配偶者特別控除も対象外';
                 }
             } else if (p.selfIncome > 10000000) {
+                out.extra = '控除なし（同一生計配偶者）';
                 out.reason = 'ご本人の合計所得金額が1,000万円を超える（配偶者控除の対象外）';
                 out.hints.push('同一生計配偶者には該当するため、障害者控除がある場合は障害者区分の入力を確認してください。');
             } else if (age != null && age >= 70) {
@@ -771,13 +788,16 @@
         if (income > limit) {
             if (age != null && age >= 19 && age < 23 && income <= specRelMax) {
                 out.mark = income <= 1000000 ? '特親（源）' : '特親';
+                out.extra = '特定親族特別控除の対象（' + yen(lookup(rules.specificRelative, income)) + '）';
                 out.reason = '特定親族（19歳以上23歳未満・所得' + man(limit) + '超' + man(specRelMax) + '以下）。配扶養区分は「対象外」のまま、「' + out.mark + '」と表示されます';
                 out.hints.push(income <= 1000000
                     ? '所得100万円以下のため源泉控除対象親族です（毎月の源泉徴収でも扶養親族等の数に含まれます）。'
                     : '所得100万円超のため源泉控除対象親族ではありません（年末調整の特定親族特別控除のみ）。');
                 out.hints.push('特定親族特別控除には生年月日と所得見積額の入力が必須です。');
             } else {
-                out.reason = '合計所得金額が' + man(limit) + 'を超える';
+                out.extra = '控除なし';
+                out.reason = '合計所得金額が' + man(limit) + 'を超えるため扶養親族に該当しない' +
+                    (age != null && age >= 19 && age < 23 ? '（' + man(specRelMax) + '超のため特定親族にも該当しない）' : '（19歳以上23歳未満ではないため特定親族にも該当しない）');
             }
             return out;
         }

@@ -230,4 +230,16 @@ eq('ICS 事業専従者 → 対象外', ics({ relation: 'child', age: 20, income
 eq('ICS judgePerson に ics が付く', jp({ relation: 'child', birth: { y: 2006, m: 8, d: 8 }, salary: 1700000 }).ics.mark, '特親（源）');
 eq('ICS calculate の persons に ics が付く', c1.persons.find(p => p.role === 'spouse').ics.kubun, '一般');
 
+// 対象外の内訳（アプリ独自の補足バッジ）
+ic = ics({ relation: 'spouse', age: 50, income: 630000, selfIncome: 4000000 });
+eq('ICS 配偶者 所得63万 → 対象外', ic.kubun, '対象外'); eq('ICS 配偶者 所得63万 → 配偶者特別控除38万', ic.extra, '配偶者特別控除の対象（380,000円）');
+eq('ICS 配偶者 所得96万 本人920万 → 配特24万', ics({ relation: 'spouse', age: 50, income: 960000, selfIncome: 9200000 }).extra, '配偶者特別控除の対象（240,000円）');
+eq('ICS 配偶者 所得133万 → 配特3万', ics({ relation: 'spouse', age: 50, income: 1330000, selfIncome: 4000000 }).extra, '配偶者特別控除の対象（30,000円）');
+eq('ICS 配偶者 所得133万超 → 控除なし', ics({ relation: 'spouse', age: 50, income: 1330001, selfIncome: 4000000 }).extra, '控除なし');
+eq('ICS 配偶者 所得63万 本人1000万超 → 控除なし', ics({ relation: 'spouse', age: 50, income: 630000, selfIncome: 10000001 }).extra, '控除なし');
+eq('ICS 配偶者 所得0 本人1000万超 → 同一生計配偶者', ics({ relation: 'spouse', age: 50, income: 0, selfIncome: 10000001 }).extra, '控除なし（同一生計配偶者）');
+eq('ICS 配偶者 一般 → 補足なし', ics({ relation: 'spouse', age: 50, income: 0, selfIncome: 4000000 }).extra, '');
+eq('ICS 子20歳 所得96万 → 特定親族特別控除41万', ics({ relation: 'child', age: 20, income: 960000, selfIncome: 4000000 }).extra, '特定親族特別控除の対象（410,000円）');
+eq('ICS 子30歳 所得70万 → 控除なし', ics({ relation: 'child', age: 30, income: 700000, selfIncome: 4000000 }).extra, '控除なし');
+
 console.log(`pass=${pass} fail=${fail}`); process.exit(fail ? 1 : 0);

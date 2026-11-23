@@ -367,6 +367,7 @@
         if (!ics) return '';
         var val = '<strong class="ics-kubun">' + esc(ics.kubun) + '</strong>' +
             (ics.mark ? ' <span class="ics-mark">' + esc(ics.mark) + '</span>' : '') +
+            (ics.extra ? ' <span class="ics-extra' + (/^控除なし/.test(ics.extra) ? ' is-none' : '') + '">' + esc(ics.extra) + '</span>' : '') +
             (ics.confirmed ? '' : (ics.pending ? '' : ' <span class="ics-unconfirmed">※表記は要確認</span>'));
         if (compact) {
             return '<div class="nencho-ics is-compact"><span class="ics-label">ICS 配扶養区分</span>' + val + '</div>';
@@ -382,7 +383,7 @@
         return html + '</div>';
     }
 
-    var ICS_FOOTNOTE = 'ICS（給与上手くんα／給与処理db）の社員登録「扶養情報①」タブの区分です。所得見積額と生年月日を入力すると自動判定されるので、その結果の確認用として使ってください。';
+    var ICS_FOOTNOTE = 'ICS（給与上手くんα／給与処理db）の社員登録「扶養情報①」タブの区分です。所得見積額と生年月日を入力すると自動判定されるので、その結果の確認用として使ってください。緑・灰色のバッジ（配偶者特別控除の対象、控除なし など）は、このアプリの補足でICSの画面には出ません。';
 
     function judgeBox(person) {
         if (!person) return '';
@@ -524,6 +525,7 @@
                 var ic = p.ics || {};
                 html += '<div class="nencho-ics-row"><div class="who">' + esc(p.label) + (p.age != null ? '<small>' + p.age + '歳</small>' : '') + '</div>' +
                     '<div class="val"><strong class="ics-kubun">' + esc(ic.kubun || '') + '</strong>' + (ic.mark ? ' <span class="ics-mark">' + esc(ic.mark) + '</span>' : '') +
+                    (ic.extra ? ' <span class="ics-extra' + (/^控除なし/.test(ic.extra) ? ' is-none' : '') + '">' + esc(ic.extra) + '</span>' : '') +
                     (ic.confirmed || ic.pending ? '' : ' <span class="ics-unconfirmed">※表記は要確認</span>') + '</div>' +
                     '<div class="why">' + esc(ic.reason || '') + '</div></div>';
             });
