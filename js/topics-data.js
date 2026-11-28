@@ -1,6 +1,27 @@
 /* Topics Content Data */
 const topicsData = [
     {
+        "date": "2026/11/27",
+        "dateType": "掲載日",
+        "content": "「免税事業者が課税事業者となる場合などの実務上の留意点」を掲載しました（消費税率引下げ特設サイト）",
+        "url": "https://www.nta.go.jp/taxes/shiraberu/zeimokubetsu/shohi/keigenzeiritsu/zeiritsuhikisage.htm#gaiyou",
+        "addedAt": "2026-11-28T14:56:17+09:00"
+    },
+    {
+        "date": "2026/11/27",
+        "dateType": "掲載日",
+        "content": "法人用 消費税及び地方消費税の申告書（一般用・簡易課税用）の書き方（令和8年11月）",
+        "url": "https://www.nta.go.jp/publication/pamph/01.htm#shohi_shinkoku",
+        "addedAt": "2026-11-28T14:56:17+09:00"
+    },
+    {
+        "date": "2026/11/25",
+        "dateType": "掲載日",
+        "content": "適用額明細書の記載の手引（令和８年４月１日以後終了事業年度分）（令和８年11月）",
+        "url": "https://www.nta.go.jp/publication/pamph/hojin/tekiyougaku/r08.htm",
+        "addedAt": "2026-11-28T14:56:17+09:00"
+    },
+    {
         "date": "2026/11/18",
         "dateType": "掲載日",
         "content": "生命保険・損害保険の一時金申告忘れていませんか？（令和8年11月）",
@@ -117,7 +138,10 @@ const topicsData = [
         "dateType": "掲載日",
         "content": "所得税徴収高計算書（源泉所得税の納付書）の送付に関するお知らせ",
         "url": "https://www.nta.go.jp/users/gensen/index.htm"
-    },
+    }
+];
+
+const topicsArchiveData = topicsData.concat([
     {
         "date": "2026/10/06",
         "dateType": "掲載日",
@@ -135,10 +159,7 @@ const topicsData = [
         "dateType": "掲載日",
         "content": "外部委託による記帳指導について、「会計ソフト方式（コンパクト型）」の概要等を掲載しました",
         "url": "https://www.nta.go.jp/taxes/shiraberu/shinkoku/kojin_jigyo/index.htm"
-    }
-];
-
-const topicsArchiveData = topicsData.concat([
+    },
     {
         "date": "2026/10/01",
         "dateType": "掲載日",
